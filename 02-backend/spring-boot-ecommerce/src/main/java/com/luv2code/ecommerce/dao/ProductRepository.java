@@ -12,7 +12,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // Automatically calls search by category column
     // Query: Select * from product where category_id=?
     /*
-        Route: https://localhost:8080/api/products/search/findCategoryById?id=1
+        Route: https://localhost:8080/api/products/search/findByCategoryId?id=1
 
         here, for this find by method we need to add /search in url
      */
