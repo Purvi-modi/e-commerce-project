@@ -7,11 +7,13 @@ import {HttpClientModule} from '@angular/common/http';
 import { ProductService } from './services/product.service';
 import { RouterModule } from '@angular/router';
 import { routes } from './routes';
+import { ProductCategoryMenuComponent } from './components/product-category-menu/product-category-menu.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    ProductListComponent
+    ProductListComponent,
+    ProductCategoryMenuComponent
   ],
   imports: [
     RouterModule.forRoot(routes),
