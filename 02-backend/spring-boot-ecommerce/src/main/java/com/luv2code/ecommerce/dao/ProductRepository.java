@@ -17,4 +17,17 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         here, for this find by method we need to add /search in url
      */
     Page<Product> findByCategoryId(@Param("id") Long id, Pageable pageable);
+
+    /*
+     Route: https://localhost:8080/api/products/search/findByNameContaining?name=Python
+
+     here, for this find by method we need to add /search in url
+
+     Query:
+     Select * from Product p
+     Where
+     p.name like CONCAT('%', :name, '%');
+     eg: name: Crash Course in Python
+  */
+    Page<Product> findByNameContaining(@Param("name") String name, Pageable pageable);
 }
