@@ -22,6 +22,8 @@ export class ProductListComponent {
   thePageSize: number = 5;
   theTotalElements: number = 0;
 
+  previousKeyword: string = "";
+
   constructor(private productService:ProductService,
     private route: ActivatedRoute
   ){
@@ -51,11 +53,19 @@ export class ProductListComponent {
 
     const keyword: string = this.route.snapshot.paramMap.get('keyword')!;
 
-    this.productService.searchProducts(keyword).subscribe(
-      data => {
-        this.products = data
-      }
-    );
+    // if we have a different keyword than the previous one, 
+    // then set page number to one
+    if(this.previousKeyword !== keyword){
+      this.thePageNumber = 1;
+    }
+
+    this.previousKeyword = keyword;
+
+    console.log(`keyword=${keyword},pageNumber=${this.thePageNumber}`);
+
+    this.productService.searchProductsPaginate(this.thePageNumber - 1, 
+                                              this.thePageSize, 
+                                              keyword).subscribe(this.processResult());
   }
 
   updatePageSize(pageSize: string) {
@@ -102,13 +112,16 @@ export class ProductListComponent {
       this.thePageNumber - 1,  // in spring pages begin from 0
       this.thePageSize, 
       this.currentCategoryId
-    ).subscribe(
-      data => {
-        this.products = data._embedded.products;
-        this.thePageNumber = data.page.number + 1;
-        this.thePageSize = data.page.size;
-        this.theTotalElements = data.page.totalElements;
-      }
-    )
+    ).subscribe(this.processResult())
+  }
+
+  processResult(){
+    //processResult() itself doesn’t process data — it returns an arrow function:
+    return (data: any) => {
+      this.products = data._embedded.products;
+      this.thePageNumber = data.page.number + 1;
+      this.thePageSize = data.page.size;
+      this.theTotalElements = data.page.totalElements;
+    }
   }
 }
