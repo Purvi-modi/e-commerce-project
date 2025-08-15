@@ -11,6 +11,7 @@ import { ProductService } from 'src/app/services/product.service';
 })
 export class ProductListComponent {
 
+
   products: Product[] = [];
   currentCategoryId: number = 1;
   previousCategoryId: number = 1;
@@ -18,7 +19,7 @@ export class ProductListComponent {
 
   // new properties for pagination
   thePageNumber: number = 1;
-  thePageSize: number = 10;
+  thePageSize: number = 5;
   theTotalElements: number = 0;
 
   constructor(private productService:ProductService,
@@ -55,6 +56,12 @@ export class ProductListComponent {
         this.products = data
       }
     );
+  }
+
+  updatePageSize(pageSize: string) {
+    this.thePageSize = +pageSize;
+    this.thePageNumber = 1;
+    this.listProducts();
   }
 
   handleListProducts(){
