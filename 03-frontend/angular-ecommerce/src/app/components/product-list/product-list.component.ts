@@ -1,127 +1,137 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { CartItem } from 'src/app/common/cart-item';
 import { Product } from 'src/app/common/product';
+import { CartService } from 'src/app/services/cart.service';
 import { ProductService } from 'src/app/services/product.service';
 
 @Component({
-  selector: 'app-product-list',
-  templateUrl: './product-list-grid.component.html',
-  //templateUrl: './product-list.component.html',
-  styleUrls: ['./product-list.component.css']
+	selector: 'app-product-list',
+	templateUrl: './product-list-grid.component.html',
+	//templateUrl: './product-list.component.html',
+	styleUrls: ['./product-list.component.css']
 })
 export class ProductListComponent {
 
+	products: Product[] = [];
+	currentCategoryId: number = 1;
+	previousCategoryId: number = 1;
+	searchMode: boolean = false;
 
-  products: Product[] = [];
-  currentCategoryId: number = 1;
-  previousCategoryId: number = 1;
-  searchMode: boolean = false;
+	// new properties for pagination
+	thePageNumber: number = 1;
+	thePageSize: number = 5;
+	theTotalElements: number = 0;
 
-  // new properties for pagination
-  thePageNumber: number = 1;
-  thePageSize: number = 5;
-  theTotalElements: number = 0;
+	previousKeyword: string = "";
 
-  previousKeyword: string = "";
+	constructor(private productService: ProductService,
+		private route: ActivatedRoute,
+		private cartService: CartService
+	) {
 
-  constructor(private productService:ProductService,
-    private route: ActivatedRoute
-  ){
+	}
 
-  }
+	ngOnInit() {
+		this.route.paramMap.subscribe(() => {
+			this.listProducts();
+		})
 
-  ngOnInit(){
-    this.route.paramMap.subscribe(()=>{
-      this.listProducts();
-    })
-    
-  }
+	}
 
-  listProducts(){
+	listProducts() {
 
-    this.searchMode = this.route.snapshot.paramMap.has('keyword');
+		this.searchMode = this.route.snapshot.paramMap.has('keyword');
 
-    if(this.searchMode) {
-      this.handleSearchProducts();
-    }
-    else {
-      this.handleListProducts();
-    }
-  }
+		if (this.searchMode) {
+			this.handleSearchProducts();
+		}
+		else {
+			this.handleListProducts();
+		}
+	}
 
-  handleSearchProducts(){
+	handleSearchProducts() {
 
-    const keyword: string = this.route.snapshot.paramMap.get('keyword')!;
+		const keyword: string = this.route.snapshot.paramMap.get('keyword')!;
 
-    // if we have a different keyword than the previous one, 
-    // then set page number to one
-    if(this.previousKeyword !== keyword){
-      this.thePageNumber = 1;
-    }
+		// if we have a different keyword than the previous one, 
+		// then set page number to one
+		if (this.previousKeyword !== keyword) {
+			this.thePageNumber = 1;
+		}
 
-    this.previousKeyword = keyword;
+		this.previousKeyword = keyword;
 
-    console.log(`keyword=${keyword},pageNumber=${this.thePageNumber}`);
+		console.log(`keyword=${keyword},pageNumber=${this.thePageNumber}`);
 
-    this.productService.searchProductsPaginate(this.thePageNumber - 1, 
-                                              this.thePageSize, 
-                                              keyword).subscribe(this.processResult());
-  }
+		this.productService.searchProductsPaginate(this.thePageNumber - 1,
+			this.thePageSize,
+			keyword).subscribe(this.processResult());
+	}
 
-  updatePageSize(pageSize: string) {
-    this.thePageSize = +pageSize;
-    this.thePageNumber = 1;
-    this.listProducts();
-  }
+	updatePageSize(pageSize: string) {
+		this.thePageSize = +pageSize;
+		this.thePageNumber = 1;
+		this.listProducts();
+	}
 
-  handleListProducts(){
+	handleListProducts() {
 
-    /*
-      this.route => use the activated route
-      snapshot => route state at this given moment in time
-      paramMap => map of all route parameters
-      hasCategoryId - check if id parameter is available
-    */
-    const hasCategoryId: boolean = this.route.snapshot.paramMap.has('id');
-    
-    if(hasCategoryId) {
-      // get the id parameter, convert it to number using the + symbol, ! to tell compiler that value is not null
-      this.currentCategoryId = +this.route.snapshot.paramMap.get('id')!;
-    }
-    else {
-      // if no category id found, default to category 1
-      this.currentCategoryId = 1;
-    }
+		/*
+		  this.route => use the activated route
+		  snapshot => route state at this given moment in time
+		  paramMap => map of all route parameters
+		  hasCategoryId - check if id parameter is available
+		*/
+		const hasCategoryId: boolean = this.route.snapshot.paramMap.has('id');
+
+		if (hasCategoryId) {
+			// get the id parameter, convert it to number using the + symbol, ! to tell compiler that value is not null
+			this.currentCategoryId = +this.route.snapshot.paramMap.get('id')!;
+		}
+		else {
+			// if no category id found, default to category 1
+			this.currentCategoryId = 1;
+		}
 
 
-    // Check if we have a different category than previous
-    // Note: Angular will resuse a component if it is currently being viewed
-    
-    // if we have a different catgegory id than the previous 
-    // then we reset the page number back to 1
-    if(this.previousCategoryId != this.currentCategoryId) {
-      this.thePageNumber = 1;
-    }
+		// Check if we have a different category than previous
+		// Note: Angular will resuse a component if it is currently being viewed
 
-    this.previousCategoryId = this.currentCategoryId;
+		// if we have a different catgegory id than the previous 
+		// then we reset the page number back to 1
+		if (this.previousCategoryId != this.currentCategoryId) {
+			this.thePageNumber = 1;
+		}
 
-    console.log(`currentCatgeoryId=${this.currentCategoryId}, thePageNumber=${this.thePageNumber}`);
+		this.previousCategoryId = this.currentCategoryId;
 
-    // get product list for current category
-    this.productService.getProductListPaginate(
-      this.thePageNumber - 1,  // in spring pages begin from 0
-      this.thePageSize, 
-      this.currentCategoryId
-    ).subscribe(this.processResult())
-  }
+		console.log(`currentCatgeoryId=${this.currentCategoryId}, thePageNumber=${this.thePageNumber}`);
 
-  processResult(){
-    //processResult() itself doesn’t process data — it returns an arrow function:
-    return (data: any) => {
-      this.products = data._embedded.products;
-      this.thePageNumber = data.page.number + 1;
-      this.thePageSize = data.page.size;
-      this.theTotalElements = data.page.totalElements;
-    }
-  }
+		// get product list for current category
+		this.productService.getProductListPaginate(
+			this.thePageNumber - 1,  // in spring pages begin from 0
+			this.thePageSize,
+			this.currentCategoryId
+		).subscribe(this.processResult())
+	}
+
+	processResult() {
+		//processResult() itself doesn’t process data — it returns an arrow function:
+		return (data: any) => {
+			this.products = data._embedded.products;
+			this.thePageNumber = data.page.number + 1;
+			this.thePageSize = data.page.size;
+			this.theTotalElements = data.page.totalElements;
+		}
+	}
+
+	addToCart(product: Product) {
+		console.log(`add product: ${product.name} ${product.unitPrice}`);
+
+		const cartItem = new CartItem(product);
+
+		this.cartService.addToCart(cartItem);
+	}
 }
