@@ -3,64 +3,85 @@ import { Subject } from 'rxjs';
 import { CartItem } from '../common/cart-item';
 
 @Injectable({
-  providedIn: 'root'
+	providedIn: 'root'
 })
 export class CartService {
 
-  public totalPrice: Subject<number> = new Subject<number>();
-  public totalQuantity: Subject<number> = new Subject<number>();
-  public cartItems: CartItem[] = [];
+	public totalPrice: Subject<number> = new Subject<number>();
+	public totalQuantity: Subject<number> = new Subject<number>();
+	public cartItems: CartItem[] = [];
 
-  constructor() { }
+	constructor() { }
 
-  addToCart(cartItem: CartItem){
+	addToCart(cartItem: CartItem) {
 
-    let alreadyExistsInCart: Boolean = false;
-    // if Item exists, increase quanityt
-    if(this.cartItems.length > 0){
+		let alreadyExistsInCart: Boolean = false;
+		// if Item exists, increase quanityt
+		if (this.cartItems.length > 0) {
 
-      this.cartItems.forEach((item) => {
-        if (item.id === cartItem.id) {
-          item.quantity += 1;  // simpler and correct
-          alreadyExistsInCart = true;
-        }
-      });
+			this.cartItems.forEach((item) => {
+				if (item.id === cartItem.id) {
+					item.quantity += 1;  // simpler and correct
+					alreadyExistsInCart = true;
+				}
+			});
 
-    }
+		}
 
-    // if not, add item
-    if(!alreadyExistsInCart){
-      this.cartItems.push(cartItem);
-    }
+		// if not, add item
+		if (!alreadyExistsInCart) {
+			this.cartItems.push(cartItem);
+		}
 
-    this.cartItems.forEach((item) => {
-        console.log(`name: ${item.name}, quantity: ${item.quantity}`)
-      });
+		this.cartItems.forEach((item) => {
+			console.log(`name: ${item.name}, quantity: ${item.quantity}`)
+		});
 
-    // calculate the total price and quantity
-    this.computeCartTotals();
-  }
+		// calculate the total price and quantity
+		this.computeCartTotals();
+	}
 
-  computeCartTotals() {
+	decreamentQuantity(cartItem: CartItem) {
 
-    let totalPrice = 0;
-    let totalQuantity = 0;
-    // iterate over cart items
-    for(let cartItem of this.cartItems){
-        
-        // add quantiy * unit price
-        totalPrice += cartItem.unitPrice * cartItem.quantity;
+		cartItem.quantity--;
 
-        // add to total price
-        totalQuantity += cartItem.quantity;
+		if (cartItem.quantity == 0) {
+			this.remove(cartItem);
+		} else {
+			this.computeCartTotals();
+		}
+	}
 
-        // add quantuy to total quantity
-        
-        // send signal for total price and total quantuty
-        
-    }
+	remove(cartItem: CartItem) {
 
-    this.totalPrice.next(totalPrice);
-    this.totalQuantity.next(totalQuantity);
-  }
+		// get index of item in the array
+		const itemIndex = this.cartItems.findIndex((item) => item.id == cartItem.id);
+
+		// if found, remove the item from the array at the given index
+		if (itemIndex > -1) {
+			this.cartItems.splice(itemIndex, 1);
+
+			this.computeCartTotals();
+		}
+	}
+
+	computeCartTotals() {
+
+		let totalPrice = 0;
+		let totalQuantity = 0;
+		// iterate over cart items
+		for (let cartItem of this.cartItems) {
+
+			// add quantiy * unit price
+			totalPrice += cartItem.unitPrice * cartItem.quantity;
+
+			// add to total price
+			totalQuantity += cartItem.quantity;
+
+		}
+
+		this.totalPrice.next(totalPrice);
+		this.totalQuantity.next(totalQuantity);
+	}
+
 }
