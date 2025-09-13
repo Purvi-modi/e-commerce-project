@@ -3,6 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { every, first, last } from 'rxjs';
 import { Country } from 'src/app/common/country';
 import { State } from 'src/app/common/state';
+import { CartService } from 'src/app/services/cart.service';
 import { CheckoutFormService } from 'src/app/services/checkout-form.service';
 import { CustomValidators } from 'src/app/validators/custom-validators';
 
@@ -25,7 +26,11 @@ export class CheckoutComponent implements OnInit{
   shippingAddressStates: State[] = [];
   billingAddressStates: State[] = [];
 
-  constructor(private formBuilder: FormBuilder, private checkoutFormService: CheckoutFormService) {
+  constructor(
+    private formBuilder: FormBuilder, 
+    private checkoutFormService: CheckoutFormService,
+    private cartService: CartService
+  ) {
 
   }
 
@@ -110,6 +115,8 @@ export class CheckoutComponent implements OnInit{
 
     });
 
+    this.reviewCartDetails();
+
     // populate credit card months
     const startMonth: number = new Date().getMonth() + 1;
 
@@ -137,6 +144,22 @@ export class CheckoutComponent implements OnInit{
       }
     )
   }
+
+  reviewCartDetails(){
+
+    this.cartService.totalPrice.subscribe(
+      price =>{
+        this.totalPrice = price;
+      }
+    );
+
+    this.cartService.totalQuantity.subscribe(
+      quantity => {
+        this.totalQuantity = quantity;
+      }
+    )
+  }
+
 
   onSubmit() {
     console.log("handling the submit button");

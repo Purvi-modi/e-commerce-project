@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { CartItem } from '../common/cart-item';
 
 @Injectable({
@@ -7,8 +7,9 @@ import { CartItem } from '../common/cart-item';
 })
 export class CartService {
 
-	public totalPrice: Subject<number> = new Subject<number>();
-	public totalQuantity: Subject<number> = new Subject<number>();
+	// use behavior subject to provide value to new subscribers that are in components newly initilized after value was changed
+	public totalPrice: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+	public totalQuantity: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 	public cartItems: CartItem[] = [];
 
 	constructor() { }
