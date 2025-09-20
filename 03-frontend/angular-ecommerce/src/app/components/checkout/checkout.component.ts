@@ -72,7 +72,7 @@ export class CheckoutComponent implements OnInit{
         zipCode: new FormControl('', 
                             [Validators.required,
                              CustomValidators.notOnlyWhitespace,
-                            Validators.pattern('^\\d{5}$')])
+                            Validators.minLength(2)])
       }),
 
       billingAddress: this.formBuilder.group({
@@ -93,7 +93,7 @@ export class CheckoutComponent implements OnInit{
         zipCode: new FormControl('', 
                             [Validators.required,
                              CustomValidators.notOnlyWhitespace,
-                            Validators.pattern('^\\d{5}$')])
+                            Validators.minLength(2)])
       }),
 
       creditCard: this.formBuilder.group({
